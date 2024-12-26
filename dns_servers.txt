@@ -61,6 +61,7 @@
 52.29.2.17 - AS16509 Amazon.com, Inc.
 13.71.132.203 - AS8075 Microsoft Corporation
 51.145.98.63 - AS8075 Microsoft Corporation
+140.238.237.56 - AS31898 Oracle Corporation
 208.91.112.220 - AS40934 Fortinet Inc.
 66.42.33.24 - AS20473 The Constant Company, LLC
 39.110.207.124 - AS2527 Sony Network Communications Inc.
