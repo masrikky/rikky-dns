@@ -61,6 +61,9 @@
 52.29.2.17 - AS16509 Amazon.com, Inc.
 13.71.132.203 - AS8075 Microsoft Corporation
 51.145.98.63 - AS8075 Microsoft Corporation
+13.76.82.212 - AS8075 Microsoft Corporation
+20.212.95.229 - AS8075 Microsoft Corporation
+20.195.108.146 - AS8075 Microsoft Corporation
 140.238.237.56 - AS31898 Oracle Corporation
 208.91.112.220 - AS40934 Fortinet Inc.
 66.42.33.24 - AS20473 The Constant Company, LLC
@@ -95,6 +98,12 @@
 193.227.29.32 - AS2561 Egyptian Universities Network (EUN)
 88.208.192.73 - AS8560 IONOS SE
 178.128.46.208 - AS14061 DigitalOcean, LLC
+68.183.179.157 - AS14061 DigitalOcean, LLC
+188.166.243.215 - AS14061 DigitalOcean, LLC
+206.189.92.228 - AS14061 DigitalOcean, LLC
+139.59.194.82 - AS14061 DigitalOcean, LLC
+174.138.21.128 - AS14061 DigitalOcean, LLC
+159.223.92.182 - AS14061 DigitalOcean, LLC
 195.59.43.159 - AS1273 Vodafone Group PLC
 95.111.248.242 - AS51167 Contabo GmbH
 80.241.209.81 - AS51167 Contabo GmbH
