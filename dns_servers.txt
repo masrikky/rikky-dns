@@ -111,6 +111,19 @@
 82.213.32.29 - AS12975 Palestine Telecommunications Company (PALTEL)
 213.6.77.30 - AS12975 Palestine Telecommunications Company (PALTEL)
 213.6.20.57 - AS12975 Palestine Telecommunications Company (PALTEL)
+129.126.63.122 - AS17547 M1 NET LTD
+120.50.42.142 - AS17547 M1 NET LTD
+210.80.58.76 - AS703 Verizon Business
+210.80.58.91 - AS703 Verizon Business
+210.80.58.210 - AS703 Verizon Business
+210.80.58.193 - AS703 Verizon Business
+42.61.73.150 - AS3758 SingNet
+119.75.28.242 - AS3758 SingNet
+180.255.3.49 - AS3758 SingNet
+203.125.208.78 - AS3758 SingNet
+42.61.107.9 - AS3758 SingNet
+116.12.161.97 - AS3758 SingNet
+203.127.160.67 - AS3758 SingNet
 103.165.61.90 - AS17995 PT iForte Global Internet
 223.25.98.34 - AS9341 PT Indonesia Comnets Plus
 117.102.75.50 - AS17451 BIZNET NETWORKS
