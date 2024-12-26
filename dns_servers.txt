@@ -107,6 +107,10 @@
 195.186.1.107 - AS3303 Swisscom (Schweiz) AG
 193.135.143.29 - AS3303 Swisscom (Schweiz) AG
 89.249.44.73 - AS15623 Cyberlink AG
+213.244.69.113 - AS12975 Palestine Telecommunications Company (PALTEL)
+82.213.32.29 - AS12975 Palestine Telecommunications Company (PALTEL)
+213.6.77.30 - AS12975 Palestine Telecommunications Company (PALTEL)
+213.6.20.57 - AS12975 Palestine Telecommunications Company (PALTEL)
 103.165.61.90 - AS17995 PT iForte Global Internet
 223.25.98.34 - AS9341 PT Indonesia Comnets Plus
 117.102.75.50 - AS17451 BIZNET NETWORKS
