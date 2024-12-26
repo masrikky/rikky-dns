@@ -66,6 +66,11 @@
 20.195.108.146 - AS8075 Microsoft Corporation
 140.238.237.56 - AS31898 Oracle Corporation
 208.91.112.220 - AS40934 Fortinet Inc.
+45.90.29.120 - AS34939 nextdns, Inc.
+45.90.30.97 - AS34939 nextdns, Inc.
+45.90.29.149 - AS34939 nextdns, Inc.
+45.90.31.217 - AS34939 nextdns, Inc.
+45.90.28.169 - AS34939 nextdns, Inc.
 66.42.33.24 - AS20473 The Constant Company, LLC
 39.110.207.124 - AS2527 Sony Network Communications Inc.
 85.203.37.2 - AS36351 SoftLayer Technologies Inc.
