@@ -32,6 +32,7 @@
 64.6.64.6 - AS19905 Vercara, LLC
 64.6.65.6 - AS397220 - Vercara, LLC
 185.71.138.138 - AS14907 Wikimedia Foundation Inc.
+77.88.8.8 - AS13238 YANDEX LLC
 103.165.61.90 - AS17995 PT iForte Global Internet
 223.25.98.34 - AS9341 PT Indonesia Comnets Plus
 117.102.75.50 - AS17451 BIZNET NETWORKS
