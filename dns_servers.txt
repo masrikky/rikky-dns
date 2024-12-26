@@ -100,6 +100,13 @@
 80.241.209.81 - AS51167 Contabo GmbH
 173.212.241.107 - AS51167 Contabo GmbH
 95.111.247.213 - AS51167 Contabo GmbH
+85.195.226.210 - AS13030 Init7 (Switzerland) Ltd.
+195.186.1.110 - AS3303 Swisscom (Schweiz) AG
+146.4.122.54 - AS3303 Swisscom (Schweiz) AG
+194.209.225.10 - AS3303 Swisscom (Schweiz) AG
+195.186.1.107 - AS3303 Swisscom (Schweiz) AG
+193.135.143.29 - AS3303 Swisscom (Schweiz) AG
+89.249.44.73 - AS15623 Cyberlink AG
 103.165.61.90 - AS17995 PT iForte Global Internet
 223.25.98.34 - AS9341 PT Indonesia Comnets Plus
 117.102.75.50 - AS17451 BIZNET NETWORKS
