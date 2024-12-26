@@ -48,6 +48,7 @@
 210.141.99.89 - AS2516 KDDI CORPORATION
 59.139.20.218 - AS2516 KDDI CORPORATION
 210.249.101.84 - AS2516 KDDI CORPORATION
+222.230.107.6 - AS2519 ARTERIA Networks Corporation
 210.171.38.41 - AS24296 Yahoo Japan Corporation
 150.31.249.103 - AS2497 Internet Initiative Japan Inc.
 126.249.83.70 - AS17676 Softbank BB Corp.
@@ -57,6 +58,9 @@
 49.212.129.134 - AS9371 SAKURA Internet Inc.
 203.181.255.66 - AS2907 Research Organization of Information and Systems, National Institute of Informatics
 150.99.181.122 - AS2907 Research Organization of Information and Systems, National Institute of Informatics
+88.221.162.172 - AS21342 Akamai International B.V.
+5.249.152.156 - AS31034 Aruba S.p.A.
+81.93.185.19 - AS2914 NTT America, Inc.
 54.168.67.37 - AS16509 Amazon.com, Inc.
 52.29.2.17 - AS16509 Amazon.com, Inc.
 13.71.132.203 - AS8075 Microsoft Corporation
