@@ -55,6 +55,7 @@ $dns_servers = load_dns_servers_from_file($filename);
 $domain = get_domain_from_url();
 
 // Output Tabel dengan format yang diperbarui
+echo "<title>DNS Propagation Checker</title>";
 echo "<table border='1' cellpadding='10' cellspacing='0' style='border-collapse: collapse;'>";
 echo "<tr><th>No</th><th>DNS Server IP</th><th>ISP Name</th><th>Domain</th><th>Record Type</th><th>Propagated</th></tr>";
 
