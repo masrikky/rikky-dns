@@ -39,6 +39,49 @@
 103.189.116.20 - AS149878 PT Callysta Total Solusindo
 103.147.247.13 - AS139972 PT. Putra Lebak Banten
 103.179.182.237 - AS142394 PT Cahaya Solusindo Internusa
+103.138.71.117 - AS138884 PT Centronet Data Indonesia
+202.158.29.250 - AS4787 PT Cyberindo Aditama
+103.42.118.50 - AS24519 PT Kusuma Dinatha Jaya Abadi
+182.16.179.20 - AS17995 PT iForte Global Internet
+103.165.33.138 - AS17995 PT iForte Global Internet
+103.20.184.97 - AS58553 PT 3D Tech
+103.178.12.21 - AS147165 PT Amerta Asa Media
+103.159.195.209 - AS141145 PT Giga Digital Nusantara
+202.146.130.198 - AS24212 PT. JASNITA TELEKOMINDO
+58.147.189.90 - AS24534 PT. Transhybrid Communication
+103.20.184.81 - AS58553 PT 3D Tech
+103.150.223.101 - AS140403 PT. Graha Fatta
+103.153.190.49 - AS140469 PT Wahyu Adidaya Network
+103.155.199.45 - AS58821 PT Lintas Jaringan Nusantara
+103.145.180.250 - AS9341 PT Indonesia Comnets Plus
+103.169.135.27 - AS142338 PT Neo Santara Solusi
+103.67.91.253 - AS152005 PT Soultan Network Indonesia
+103.144.183.163 - AS9341 PT Indonesia Comnets Plus
+103.164.222.107 - AS17995 PT iForte Global Internet
+103.161.128.128 - AS141626 PT Sandya Sistem Indonesia
+103.118.178.18 - AS137370 PT. Infomedia Global Nusantara
+103.160.21.2 - AS141578 Universitas Pancasila
+103.179.73.93 - AS9341 PT Indonesia Comnets Plus
+103.28.114.134 - AS45305 PT. Lintas Data Prima
+43.225.67.153 - AS58495 PT Parsaoran Global Datatrans
+101.255.119.209 - AS38511 PT Remala Abadi
+116.90.166.76 - AS18059 DTPNET NAP
+103.144.252.118 - AS9341 PT Indonesia Comnets Plus
+103.139.112.201 - AS138893 PT PRIMA MULTI TERMINAL
+103.191.94.10 - AS149412 PT Centris Data Indonesia
+103.132.52.145 - AS138123 PT. ADEAKSA INDO JAYATAMA
+103.156.57.50 - AS141083 PT Filltech Antar Nusa
+103.149.121.162 - AS140023 Dinas Komunikasi dan Informatika Kota Madiun
+103.84.119.226 - AS64316 Universitas Islam Negeri Raden Fatah Palembang
+103.154.91.212 - AS131111 PT Mora Telematika Indonesia
+103.84.119.192 - AS64316 Universitas Islam Negeri Raden Fatah Palembang
+103.156.57.214 - AS141083 PT Filltech Antar Nusa
+220.247.171.244 - AS9341 PT Indonesia Comnets Plus
+103.215.16.230 - AS64031 PT. Kreasi Sejahtera Teknologi
+103.141.75.113 - AS138892 Pemerintah Kota Padang
+103.151.226.62 - AS140429 PT. MEDIA DISTRIBUSI PRIMA
+103.153.42.199 - AS140444 Universitas Binawan
+103.166.200.90 - AS38758 PT. HIPERNET INDODATA
 9.9.9.9 - AS19281 Quad9
 1.0.0.2 - AS13335 Cloudflare, Inc.
 8.215.30.242 - AS45102 Alibaba (US) Technology Co., Ltd.
