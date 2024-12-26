@@ -143,8 +143,22 @@
 116.12.161.97 - AS3758 SingNet
 203.127.160.67 - AS3758 SingNet
 103.165.61.90 - AS17995 PT iForte Global Internet
-223.25.98.34 - AS9341 PT Indonesia Comnets Plus
 117.102.75.50 - AS17451 BIZNET NETWORKS
+103.88.88.88 - AS4622 Indonesia Network Information Center (APJII)
+103.88.88.89 - AS4622 Indonesia Network Information Center (APJII)
+103.88.88.90 - AS4622 Indonesia Network Information Center (APJII)
+103.88.88.91 - AS4622 Indonesia Network Information Center (APJII)
+103.88.88.92 - AS4622 Indonesia Network Information Center (APJII)
+103.88.88.93 - AS4622 Indonesia Network Information Center (APJII)
+103.88.88.94 - AS4622 Indonesia Network Information Center (APJII)
+103.88.88.95 - AS4622 Indonesia Network Information Center (APJII)
+103.88.88.96 - AS4622 Indonesia Network Information Center (APJII)
+103.88.88.97 - AS4622 Indonesia Network Information Center (APJII)
+103.88.88.98 - AS4622 Indonesia Network Information Center (APJII)
+103.88.88.99 - AS4622 Indonesia Network Information Center (APJII)
+203.119.13.77 - AS4622 Indonesia Network Information Center (APJII)
+203.119.13.78 - AS4622 Indonesia Network Information Center (APJII)
+223.25.98.34 - AS9341 PT Indonesia Comnets Plus
 103.19.59.168 - AS132637 PT BINA INFORMATIKA SOLUSI
 103.155.198.73 - AS58821 PT Lintas Jaringan Nusantara
 103.189.197.81 - AS149912 PT Graha Sumber Teknologi
