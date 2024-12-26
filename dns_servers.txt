@@ -1,5 +1,6 @@
 103.165.61.90 - AS17995 PT iForte Global Internet
 223.25.98.34 - AS9341 PT Indonesia Comnets Plus
+117.102.75.50 - AS17451 BIZNET NETWORKS
 103.19.59.168 - AS132637 PT BINA INFORMATIKA SOLUSI
 103.155.198.73 - AS58821 PT Lintas Jaringan Nusantara
 103.189.197.81 - AS149912 PT Graha Sumber Teknologi
@@ -24,6 +25,20 @@
 103.132.52.145 - AS138123 PT. ADEAKSA INDO JAYATAMA
 103.141.109.137 - AS138886 PT Data Buana Nusantara
 202.74.238.29 - AS131775 PT. Jupiter Jala Arta
+103.147.246.68 - AS139972 PT. Putra Lebak Banten
+43.225.66.149 - AS58495 PT Parsaoran Global Datatrans
+27.111.38.154 - AS24532 PT. Inet Global Indo
+202.52.58.198 - AS46058 PT. Triwahana Gemasakti
+103.156.233.105 - AS141098 PT Multimedia Link Technology
+119.110.71.220 - AS38320 PT Maxindo Mitra Solusi
+103.135.26.86 - AS38320 PT Maxindo Mitra Solusi
+206.84.97.98 - AS64315 PT MITRA VISIONER PRATAMA
+103.145.31.131 - AS9341 PT Indonesia Comnets Plus
+103.160.201.198 - AS141600 PT Viriya Surya Abadi
+103.165.39.50 - AS17995 PT iForte Global Internet
+103.189.116.20 - AS149878 PT Callysta Total Solusindo
+103.147.247.13 - AS139972 PT. Putra Lebak Banten
+103.179.182.237 - AS142394 PT Cahaya Solusindo Internusa
 9.9.9.9 - AS19281 Quad9
 1.0.0.2 - AS13335 Cloudflare, Inc.
 8.215.30.242 - AS45102 Alibaba (US) Technology Co., Ltd.
