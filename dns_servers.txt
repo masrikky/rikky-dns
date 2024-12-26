@@ -1,0 +1,29 @@
+103.165.61.90 - AS17995 PT iForte Global Internet
+223.25.98.34 - AS9341 PT Indonesia Comnets Plus
+103.19.59.168 - AS132637 PT BINA INFORMATIKA SOLUSI
+8.215.30.242 - AS45102 Alibaba (US) Technology Co., Ltd.
+103.155.198.73 - AS58821 PT Lintas Jaringan Nusantara
+103.189.197.81 - AS149912 PT Graha Sumber Teknologi
+103.165.154.1 - AS141965 Diskominfo Kota Pasuruan
+27.54.117.180 - AS58396 PT. DEWATA TELEMATIKA
+139.255.59.163 - AS9905 Linknet ASN
+103.179.182.101 - AS142394 PT Cahaya Solusindo Internusa
+103.156.15.45 - AS58821 PT Lintas Jaringan Nusantara
+114.129.18.84 - AS38758 PT. HIPERNET INDODATA
+103.67.91.162 - AS152005 PT Soultan Network Indonesia
+103.161.128.130 - AS141626 PT Sandya Sistem Indonesia
+43.225.67.153 - AS58495 PT Parsaoran Global Datatrans
+103.124.188.17 - AS17995 PT iForte Global Internet
+202.43.162.20 - AS18059 DTPNET NAP
+103.175.238.110 - AS147122 PT Uliz Netmedia Solusindo
+103.141.75.2 - AS138892 Pemerintah Kota Padang
+119.252.174.34 - AS9341 PT Indonesia Comnets Plus
+103.151.226.62 - AS140429 PT. MEDIA DISTRIBUSI PRIMA
+103.161.108.98 - AS141912 Dinas Komunikasi dan Informatika Kabupaten Bondowoso
+183.81.152.2 - AS24527 Internet Service Provider
+124.158.171.90 - AS9341 PT Indonesia Comnets Plus
+103.132.52.145 - AS138123 PT. ADEAKSA INDO JAYATAMA
+103.141.109.137 - AS138886 PT Data Buana Nusantara
+202.74.238.29 - AS131775 PT. Jupiter Jala Arta
+9.9.9.9 - AS19281 Quad9
+1.0.0.2 - AS13335 Cloudflare, Inc.
