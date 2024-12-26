@@ -1,3 +1,37 @@
+9.9.9.9 - AS19281 Quad9
+9.9.9.10 - AS19281 Quad9
+149.112.112.10 - AS19281 Quad9
+149.112.112.112 - AS19281 Quad9
+1.1.1.1 - AS13335 Cloudflare, Inc.
+1.0.0.1 - AS13335 Cloudflare, Inc.
+1.0.0.2 - AS13335 Cloudflare, Inc.
+8.8.8.8 - AS15169 Google LLC
+8.8.4.4 - AS15169 Google LLC
+208.67.222.222 - AS36692 Cisco OpenDNS, LLC
+208.67.220.220 - AS36692 Cisco OpenDNS, LLC
+180.184.1.1 - AS137718 Beijing Volcano Engine Technology Co., Ltd. (Bytedance)
+180.184.2.2 - AS137718 Beijing Volcano Engine Technology Co., Ltd. (Bytedance)
+8.26.56.26 - AS23393 NuCDN LLC (Comodo Secure DNS)
+8.20.247.20 - AS23393 NuCDN LLC (Comodo Secure DNS)
+74.82.42.42 - AS6939 Hurricane Electric LLC
+94.140.14.14 - AS212772 AdGuard Software Limited
+94.140.15.15 - AS212772 AdGuard Software Limited
+94.140.14.15 - AS212772 AdGuard Software Limited
+94.140.15.16 - AS212772 AdGuard Software Limited
+94.140.14.140 - AS212772 AdGuard Software Limited
+94.140.14.141 - AS212772 AdGuard Software Limited
+223.5.5.5 - AS45102 Alibaba (US) Technology Co., Ltd.
+223.6.6.6 - AS45102 Alibaba (US) Technology Co., Ltd.
+8.215.30.242 - AS45102 Alibaba (US) Technology Co., Ltd.
+101.226.4.6 - AS4812 China Telecom (Group)
+218.30.118.6 - AS4812 China Telecom (Group)
+123.125.81.6 - AS4812 China Telecom (Group)
+140.207.198.6 - AS4812 China Telecom (Group)
+156.154.70.1 - AS397213 Vercara, LLC
+156.154.71.1 - AS397213 Vercara, LLC
+64.6.64.6 - AS19905 Vercara, LLC
+64.6.65.6 - AS397220 - Vercara, LLC
+185.71.138.138 - AS14907 Wikimedia Foundation Inc.
 103.165.61.90 - AS17995 PT iForte Global Internet
 223.25.98.34 - AS9341 PT Indonesia Comnets Plus
 117.102.75.50 - AS17451 BIZNET NETWORKS
@@ -118,6 +152,3 @@
 103.156.141.253 - AS149883 PT Tekling Media Telematika
 139.255.22.243 - AS9905 Linknet ASN
 202.158.43.187 - AS4787 PT Cyberindo Aditama
-9.9.9.9 - AS19281 Quad9
-1.0.0.2 - AS13335 Cloudflare, Inc.
-8.215.30.242 - AS45102 Alibaba (US) Technology Co., Ltd.
