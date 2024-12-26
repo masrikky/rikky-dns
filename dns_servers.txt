@@ -68,6 +68,9 @@
 220.241.227.4 - AS4760 HKT Limited
 210.177.175.183 - AS4515 HKT Limited
 203.198.78.180 - AS4515 HKT Limited
+180.150.105.246 - AS4764 Aussie Broadband
+203.39.3.133 - AS1221 Telstra Corporation Ltd
+203.147.94.71 - AS58434 Mobilizer Pty Ltd
 103.165.61.90 - AS17995 PT iForte Global Internet
 223.25.98.34 - AS9341 PT Indonesia Comnets Plus
 117.102.75.50 - AS17451 BIZNET NETWORKS
