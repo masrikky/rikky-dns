@@ -71,6 +71,9 @@
 180.150.105.246 - AS4764 Aussie Broadband
 203.39.3.133 - AS1221 Telstra Corporation Ltd
 203.147.94.71 - AS58434 Mobilizer Pty Ltd
+94.97.248.221 - AS25019 Saudi Telecom Company JSC
+37.224.42.81 - AS25019 Saudi Telecom Company JSC
+94.97.253.127 - AS25019 Saudi Telecom Company JSC
 103.165.61.90 - AS17995 PT iForte Global Internet
 223.25.98.34 - AS9341 PT Indonesia Comnets Plus
 117.102.75.50 - AS17451 BIZNET NETWORKS
