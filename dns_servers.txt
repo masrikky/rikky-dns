@@ -59,6 +59,7 @@
 150.99.181.122 - AS2907 Research Organization of Information and Systems, National Institute of Informatics
 54.168.67.37 - AS16509 Amazon.com, Inc.
 13.71.132.203 - AS8075 Microsoft Corporation
+51.145.98.63 - AS8075 Microsoft Corporation
 208.91.112.220 - AS40934 Fortinet Inc.
 66.42.33.24 - AS20473 The Constant Company, LLC
 39.110.207.124 - AS2527 Sony Network Communications Inc.
@@ -79,6 +80,7 @@
 178.32.107.33 - AS16276 OVH SAS
 37.187.250.190 - AS16276 OVH SAS
 51.210.7.235 - AS16276 OVH SAS
+51.195.176.153 - AS16276 OVH SAS
 62.210.207.133 - AS12876 SCALEWAY S.A.S.
 196.201.244.7 - AS24863 Link Egypt (Link.NET)
 45.240.35.147 - AS24863 Link Egypt (Link.NET)
@@ -88,6 +90,9 @@
 193.227.50.3 - AS328762 Mansoura University
 193.227.29.241 - AS2561 Egyptian Universities Network (EUN)
 193.227.29.32 - AS2561 Egyptian Universities Network (EUN)
+88.208.192.73 - AS8560 IONOS SE
+178.128.46.208 - AS14061 DigitalOcean, LLC
+195.59.43.159 - AS1273 Vodafone Group PLC
 103.165.61.90 - AS17995 PT iForte Global Internet
 223.25.98.34 - AS9341 PT Indonesia Comnets Plus
 117.102.75.50 - AS17451 BIZNET NETWORKS
