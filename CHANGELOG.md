@@ -7,7 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.0] — 2026-03-11
+
+### Added
+- **NS record type** — Name Server records now supported (added between AAAA and MX in the dropdown and in ALL mode)
+
+### Fixed
+- **Mobile responsiveness** — two breakpoints added:
+  - `≤ 768px`: stats bar stacks vertically, progress bar stretches full-width, cards go single-column, buttons full-width, filter tabs and pagination buttons compact
+  - `≤ 480px`: reduced page/card padding, header scales to `1.75rem`, filter tabs go equal-width full-row, pagination ellipsis hidden to save space
+
+---
+
+## [2.1.0] — 2026-03-11
+
+### Added
+- **Pagination** — results paginated at 50 cards per page with prev/next navigation and smart page-number windowing (e.g. `1 … 3 4 5 … 11`). Page info label shows current range (e.g. `51–100 of 275`).
+- **Filter tabs** — three tabs above results: `All`, `● Resolved`, `● No Record` with live counts that update while querying. Clicking a tab instantly filters the current result set without re-querying.
+- Live card patching: visible cards update in-place; hidden (off-page) cards are corrected on `renderView()` at query completion.
+
+---
+
 ## [2.0.0] — 2026-03-11
+
 
 ### 🚀 Major Rework: PHP → Static HTML/JS
 
