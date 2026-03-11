@@ -77,6 +77,19 @@
         </select>
       </div>
 
+      <div class="form-group">
+        <label for="resolver-input">Resolver</label>
+        <input
+          type="text"
+          id="resolver-input"
+          list="resolver-list"
+          placeholder="All Resolvers"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <datalist id="resolver-list"></datalist>
+      </div>
+
       <div class="form-group" style="flex-direction:row;gap:0.5rem;align-items:flex-end">
         <button class="btn btn-primary" id="check-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -124,6 +137,22 @@
   <!-- ── Filter tabs ── -->
   <div id="filter-bar"></div>
 
+  <!-- ── Search bar ── -->
+  <div id="search-bar" hidden>
+    <div class="search-wrap">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input
+        type="search"
+        id="resolver-search"
+        placeholder="Search resolver by IP, name or ASN…"
+        autocomplete="off"
+      />
+      <span id="search-count" class="search-count"></span>
+    </div>
+  </div>
+
   <!-- ── Results ── -->
   <section class="results-section" id="results-section" aria-live="polite">
     <!-- Initial empty state -->
@@ -140,7 +169,7 @@
   <!-- ── Footer ── -->
   <footer class="site-footer">
     <p>
-      Queries are performed via <a href="https://developers.cloudflare.com/1.1.1.1/encryption/dns-over-https/" target="_blank" rel="noopener">DNS-over-HTTPS (DoH)</a> — no server required.
+      Queries performed per-resolver via UDP/TCP when hosted on PHP, otherwise via <a href="https://developers.cloudflare.com/1.1.1.1/encryption/dns-over-https/" target="_blank" rel="noopener">DNS-over-HTTPS (DoH)</a>.
       DNS server list sourced from <a href="https://publicdnsserver.com" target="_blank" rel="noopener">publicdnsserver.com</a>.
       &mdash; <a href="https://github.com/masrikky/rikky-dns" target="_blank" rel="noopener">GitHub</a>
     </p>

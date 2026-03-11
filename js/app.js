@@ -56,12 +56,18 @@ let resultsMap = new Map();
 let activeFilter = 'all';   // 'all' | 'resolved' | 'unresolved'
 let currentPage  = 1;
 let activeTypes  = [];      // record types in current query
+let searchQuery  = '';      // resolver search string
 
 // ── DOM refs ───────────────────────────────────────────────────────────────
 
 const $ = id => document.getElementById(id);
 
 const domainInput    = $('domain-input');
+const resolverInput  = $('resolver-input');  // single-resolver selector
+const resolverList   = $('resolver-list');   // datalist element
+const resolverSearch = $('resolver-search'); // results search box
+const searchBar      = $('search-bar');
+const searchCount    = $('search-count');
 const recordSelect   = $('record-select');
 const checkBtn       = $('check-btn');
 const clearBtn       = $('clear-btn');
@@ -102,6 +108,13 @@ async function init() {
     console.info('[DNS] PHP API not available — falling back to Cloudflare DoH');
   }
 
+  // Populate resolver datalist
+  for (const s of dnsServers) {
+    const opt = document.createElement('option');
+    opt.value = `${s.ip} — ${s.name}`;
+    resolverList.appendChild(opt);
+  }
+
   checkBtn.addEventListener('click', startCheck);
   clearBtn.addEventListener('click', clearResults);
   domainInput.addEventListener('keydown', e => {
@@ -113,6 +126,14 @@ async function init() {
     const btn = e.target.closest('[data-filter]');
     if (!btn) return;
     setFilter(btn.dataset.filter);
+  });
+
+  // Resolver search — live filter
+  resolverSearch.addEventListener('input', () => {
+    searchQuery = resolverSearch.value.trim().toLowerCase();
+    currentPage = 1;
+    renderView();
+    updateSearchCount();
   });
 }
 
@@ -200,12 +221,19 @@ async function startCheck() {
   activeTypes  = recordType === 'ALL' ? Object.keys(RECORD_TYPES) : [recordType];
   activeFilter = 'all';
   currentPage  = 1;
+  searchQuery  = '';
   resultsMap   = new Map();
+
+  // Resolve which servers to query
+  const resolverVal  = resolverInput.value.trim();
+  const resolverIp   = resolverVal.split(' — ')[0].trim();
+  const singleServer = dnsServers.find(s => s.ip === resolverIp) ?? null;
+  const servers      = singleServer ? [singleServer] : dnsServers;
 
   // Build flat task list
   const tasks = [];
   for (const type of activeTypes) {
-    for (const server of dnsServers) {
+    for (const server of servers) {
       const key = `${type}:${server.ip}`;
       resultsMap.set(key, { server, type, status: 'pending', values: [] });
       tasks.push({ server, type, key });
@@ -218,6 +246,9 @@ async function startCheck() {
 
   // Show UI chrome
   showFilterBar();
+  searchQuery = '';              // reset search
+  resolverSearch.value = '';
+  searchBar.hidden = false;      // show search input
   statsBar.classList.add('visible');
   domainLabel.textContent = domain;
   updateProgress(0, 0, total);
@@ -276,9 +307,13 @@ function clearResults() {
   resultsSection.innerHTML = '';
   if (filterBar)      filterBar.classList.remove('visible');
   if (paginationBar)  paginationBar.innerHTML = '';
+  searchBar.hidden = true;
+  resolverSearch.value = '';
+  searchQuery  = '';
   statsBar.classList.remove('visible');
   clearAlert();
-  domainInput.value = '';
+  domainInput.value   = '';
+  resolverInput.value = '';
   resultsMap   = new Map();
   activeFilter = 'all';
   currentPage  = 1;
@@ -349,6 +384,14 @@ function getFilteredResults() {
   let entries = [...resultsMap.values()];
   if (activeFilter === 'resolved')   entries = entries.filter(r => r.status === 'resolved');
   if (activeFilter === 'unresolved') entries = entries.filter(r => r.status === 'unresolved');
+  // Resolver text search
+  if (searchQuery) {
+    entries = entries.filter(r =>
+      r.server.ip.includes(searchQuery)   ||
+      r.server.name.toLowerCase().includes(searchQuery) ||
+      r.server.asn.toLowerCase().includes(searchQuery)
+    );
+  }
   return entries;
 }
 
@@ -539,6 +582,16 @@ function goToPage(page) {
 
 // ── Progress ───────────────────────────────────────────────────────────────
 
+function updateSearchCount() {
+  if (!searchQuery) {
+    searchCount.textContent = '';
+    return;
+  }
+  const matched = getFilteredResults().length;
+  const total   = resultsMap.size;
+  searchCount.textContent = `${matched} of ${total} resolvers`;
+}
+
 function updateProgress(completed, resolved, total) {
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
   progressFill.style.width   = `${pct}%`;
@@ -547,6 +600,7 @@ function updateProgress(completed, resolved, total) {
   statUnresolved.textContent = completed - resolved;
   statTotal.textContent      = total;
 }
+
 
 // ── Utilities ──────────────────────────────────────────────────────────────
 
