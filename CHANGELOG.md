@@ -7,7 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.0] — 2026-03-11
+
+### Added
+- **PHP per-resolver backend** (`api/check.php`) — sends real UDP DNS packets directly to each DNS server on port 53, returning true per-resolver results instead of a single global DoH answer
+  - Compatible with shared PHP hosting (uses `fsockopen("udp://...")`, no socket extension required)
+  - Full record parser: A, AAAA, NS, MX, TXT, CNAME, PTR, SOA, CAA, DS, DNSKEY
+  - Input validation, CORS headers, health-check endpoint (`?ping=1`)
+- **Auto-detect in front-end** (`js/app.js`) — on startup the app pings `/api/check.php?ping=1`; if the PHP API is available it uses per-resolver UDP queries, otherwise silently falls back to Cloudflare DoH (static hosting compatible)
+- `queryProxy()` function for PHP API calls; `query()` dispatcher that selects proxy vs. DoH at runtime
+
+---
+
 ## [2.2.0] — 2026-03-11
+
 
 ### Added
 - **NS record type** — Name Server records now supported (added between AAAA and MX in the dropdown and in ALL mode)
