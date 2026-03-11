@@ -6,12 +6,15 @@ A **static + PHP-powered** open-source web tool that checks DNS propagation acro
 
 ## Features
 
-- **True Per-Resolver Queries** — when hosted on PHP, sends real UDP/TCP DNS packets to each resolver directly (not routed through DoH)
+- **True Per-Resolver Queries** — when hosted on PHP, sends real UDP/TCP DNS packets to each resolver directly
+- **Resolver Selector** — pick a specific resolver from a searchable datalist, or leave blank to query all
+- **Results Search** — live-filter results by IP, name, or ASN after querying
 - **200+ Public Resolvers** — covers global ISPs, cloud providers, and Indonesian ISPs
 - **11 Record Types** — A, AAAA, NS, MX, TXT, CNAME, PTR, SOA, CAA, DS, DNSKEY
 - **Query All Types at Once** — select "ALL" to check every record type in a single run
 - **Pagination** — 50 results per page with smart page-number navigation
 - **Filter Tabs** — instantly filter by All / Resolved / No Record with live counts
+- **Fast Timeouts** — dead resolvers fail in ≤2 s (UDP); JS cancels hung proxy requests at 4 s
 - **Color-Coded Results** — green for resolved, red for no record found
 - **Real-time Progress** — progress bar with live resolved/unresolved counters
 - **Mobile Responsive** — fully responsive down to small phones

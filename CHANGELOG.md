@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.5.0] — 2026-03-12
+
+### Changed
+- **Smarter timeout cascade in `api/check.php`** — dead servers now fail in ~2 s instead of up to 15 s:
+  - UDP timeout reduced 5 s → **2 s** (aggressive fail-fast for non-responding resolvers)
+  - TCP is now only attempted when the UDP socket itself couldn’t be created (= PHP host blocks UDP); if UDP opened but got no reply, TCP is skipped (server is dead)
+  - cURL/DoH timeout reduced 5 s → **3 s**
+  - Worst-case per-resolver: UDP blocked host → TCP (3 s) + DoH (3 s) = **6 s** max
+  - Normal dead server: UDP (2 s) + DoH (3 s, if known endpoint) = **5 s** max
+- **`PROXY_TIMEOUT_MS = 4000`** added in `js/app.js` — JS aborts proxy requests at 4 s (matches PHP worst-case); DoH mode keeps 8 s
+- `CONCURRENT_QUERIES` increased 8 → **10** for faster overall throughput
+
+---
+
+## [2.4.0] — 2026-03-12
+
+### Added
+- **Resolver selector** — new form field "Resolver" with a searchable datalist of all 278 servers:
+  - Leave empty (default) to query **all resolvers**
+  - Type or select a specific resolver (e.g. `8.8.8.8 — Google LLC`) to run a **single-resolver query** (returns 1 result card)
+- **Results search bar** — appears after a query completes; type IP, name, or ASN to live-filter results:
+  - Combinable with the All/Resolved/No Record filter tabs
+  - Shows match count (e.g. `3 of 275 resolvers`) as you type
+  - `searchQuery` state is reset between queries
+
+---
+
 ## [2.3.0] — 2026-03-11
 
 ### Added
