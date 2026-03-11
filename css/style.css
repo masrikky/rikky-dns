@@ -158,7 +158,114 @@ body::after {
   .query-form {
     grid-template-columns: 1fr;
   }
+
+  /* Buttons full-width on mobile */
+  .query-form .form-group:last-child {
+    flex-direction: column;
+  }
+  .query-form .form-group:last-child .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Stats bar: stack pills then progress wrap below */
+  .stats-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  /* Progress wrap: full width so bar + label don't squeeze */
+  .progress-wrap {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .progress-bar-track {
+    flex: 1;
+    width: auto;
+  }
+
+  /* Filter tabs: allow wrapping, smaller text */
+  .filter-tabs {
+    gap: 0.4rem;
+  }
+  .filter-tab {
+    font-size: 0.78rem;
+    padding: 0.4rem 0.75rem;
+  }
+
+  /* Pagination: smaller buttons, tighter gap */
+  .pagination {
+    gap: 0.25rem;
+  }
+  .page-btn {
+    min-width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+  }
+  .page-info {
+    width: 100%;
+    text-align: center;
+    margin-left: 0;
+    margin-top: 0.35rem;
+  }
+
+  /* Cards: single column on very small screens */
+  .servers-grid {
+    grid-template-columns: 1fr;
+  }
 }
+
+@media (max-width: 480px) {
+  /* Even smaller: reduce page padding */
+  .page-wrapper {
+    padding: 1rem 1rem 3rem;
+  }
+
+  /* Header tighter */
+  .site-header {
+    padding: 2rem 0 1.5rem;
+  }
+  .site-header h1 {
+    font-size: 1.75rem;
+  }
+
+  /* Query card: less padding */
+  .query-card {
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  /* Stats group: pills wrap tightly */
+  .stats-group {
+    gap: 0.5rem;
+  }
+  .stat-pill {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.65rem;
+  }
+
+  /* Reduce domain label font on tiny screens */
+  .domain-label {
+    font-size: 0.72rem;
+    padding: 0.2rem 0.6rem;
+  }
+
+  /* Filter: full width tabs on tiny screens */
+  .filter-tabs {
+    width: 100%;
+  }
+  .filter-tab {
+    flex: 1;
+    justify-content: center;
+    font-size: 0.75rem;
+    padding: 0.4rem 0.5rem;
+  }
+
+  /* Pagination: hide ellipsis, keep it minimal */
+  .page-gap { display: none; }
+}
+
 
 .form-group {
   display: flex;
