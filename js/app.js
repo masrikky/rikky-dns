@@ -12,7 +12,8 @@
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
-const DOH_ENDPOINT = 'https://cloudflare-dns.com/dns-query';
+const DOH_ENDPOINT  = 'https://cloudflare-dns.com/dns-query';
+const PROXY_ENDPOINT = './api/check.php';
 
 /** DNS record types and their display config */
 const RECORD_TYPES = {
@@ -44,6 +45,7 @@ const PAGE_SIZE          = 50;   // cards per page
 let dnsServers      = [];
 let isRunning       = false;
 let abortController = null;
+let useProxy        = false;  // set to true if PHP API is available
 
 /**
  * Results store: Map<"type:ip", { server, type, status, values }>
@@ -87,6 +89,19 @@ async function init() {
     return;
   }
 
+  // Auto-detect PHP backend
+  try {
+    const ping = await fetch(`${PROXY_ENDPOINT}?ping=1`, { signal: AbortSignal.timeout(3000) });
+    const data = await ping.json();
+    if (data.status === 'ok') {
+      useProxy = true;
+      console.info('[DNS] Using PHP per-resolver backend');
+    }
+  } catch (_) {
+    useProxy = false;
+    console.info('[DNS] PHP API not available — falling back to Cloudflare DoH');
+  }
+
   checkBtn.addEventListener('click', startCheck);
   clearBtn.addEventListener('click', clearResults);
   domainInput.addEventListener('keydown', e => {
@@ -104,40 +119,52 @@ async function init() {
 // ── Query helpers ──────────────────────────────────────────────────────────
 
 /**
- * Query Cloudflare DoH for a single record type.
- * @returns {string[]} array of formatted record values, or [] on NXDOMAIN/error
+ * Query a specific DNS server via the PHP proxy (real UDP per-resolver).
+ * @returns {string[]} resolved records, or [] on NXDOMAIN/error
  */
-async function queryDoh(domain, type, signal) {
-  const typeCode = TYPE_CODES[type] ?? type;
-  const url = `${DOH_ENDPOINT}?name=${encodeURIComponent(domain)}&type=${typeCode}`;
-
+async function queryProxy(domain, type, serverIp, signal) {
+  const url = `${PROXY_ENDPOINT}?domain=${encodeURIComponent(domain)}&type=${type}&server=${encodeURIComponent(serverIp)}`;
   let res;
   try {
-    res = await fetch(url, {
-      headers: { Accept: 'application/dns-json' },
-      signal,
-    });
+    res = await fetch(url, { signal });
   } catch (err) {
     if (err.name === 'AbortError') throw err;
     return [];
   }
-
   if (!res.ok) return [];
-
   const data = await res.json();
-
-  // Status 0 = NOERROR, 3 = NXDOMAIN
-  if (data.Status !== 0) return [];
-
-  const answers = (data.Answer || []).filter(a => a.type === typeCode);
-  return answers.map(a => formatAnswer(a, type));
+  return (data.status === 'ok' && Array.isArray(data.records)) ? data.records : [];
 }
 
-/** Format a DoH answer into a human-readable string */
-function formatAnswer(ans, type) {
-  const d = ans.data;
-  if (type === 'TXT') return d.replace(/^"|"$/g, '');
-  return d;
+/**
+ * Query Cloudflare DoH (fallback when PHP API is unavailable).
+ * @returns {string[]} resolved records, or []
+ */
+async function queryDoh(domain, type, signal) {
+  const typeCode = TYPE_CODES[type] ?? type;
+  const url = `${DOH_ENDPOINT}?name=${encodeURIComponent(domain)}&type=${typeCode}`;
+  let res;
+  try {
+    res = await fetch(url, { headers: { Accept: 'application/dns-json' }, signal });
+  } catch (err) {
+    if (err.name === 'AbortError') throw err;
+    return [];
+  }
+  if (!res.ok) return [];
+  const data = await res.json();
+  if (data.Status !== 0) return [];
+  const answers = (data.Answer || []).filter(a => a.type === typeCode);
+  return answers.map(a => {
+    const d = a.data;
+    return type === 'TXT' ? d.replace(/^"|"$/g, '') : d;
+  });
+}
+
+/** Unified query: uses proxy if available, else DoH */
+async function query(domain, type, serverIp, signal) {
+  return useProxy
+    ? queryProxy(domain, type, serverIp, signal)
+    : queryDoh(domain, type, signal);
 }
 
 // ── Main check flow ────────────────────────────────────────────────────────
@@ -208,7 +235,7 @@ async function startCheck() {
         let values = [];
         try {
           values = await Promise.race([
-            queryDoh(domain, type, abortController.signal),
+            query(domain, type, server.ip, abortController.signal),
             new Promise((_, rej) =>
               setTimeout(() => rej(new Error('timeout')), QUERY_TIMEOUT_MS)
             ),
