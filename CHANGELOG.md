@@ -10,12 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.3.0] — 2026-03-11
 
 ### Added
-- **PHP per-resolver backend** (`api/check.php`) — sends real UDP DNS packets directly to each DNS server on port 53, returning true per-resolver results instead of a single global DoH answer
-  - Compatible with shared PHP hosting (uses `fsockopen("udp://...")`, no socket extension required)
+- **PHP per-resolver backend** (`api/check.php`) — queries each DNS server directly using a transport fallback chain:
+  1. **UDP** (`fsockopen udp://`) — fastest, used when available
+  2. **TCP** (`fsockopen` port 53, 2-byte length prefix) — more shared-hosting compatible than UDP
+  3. **DoH via cURL** (RFC 8484 binary POST) — last resort for 25+ major resolvers with known public DoH endpoints (Cloudflare, Google, Quad9, AdGuard, OpenDNS, Alibaba, NextDNS, Hurricane Electric, Yandex…)
+  - Response includes a `method` field (`"udp"` / `"tcp"` / `"doh"`) indicating which transport was used
   - Full record parser: A, AAAA, NS, MX, TXT, CNAME, PTR, SOA, CAA, DS, DNSKEY
   - Input validation, CORS headers, health-check endpoint (`?ping=1`)
-- **Auto-detect in front-end** (`js/app.js`) — on startup the app pings `/api/check.php?ping=1`; if the PHP API is available it uses per-resolver UDP queries, otherwise silently falls back to Cloudflare DoH (static hosting compatible)
-- `queryProxy()` function for PHP API calls; `query()` dispatcher that selects proxy vs. DoH at runtime
+- **Auto-detect in front-end** (`js/app.js`) — pings `/api/check.php?ping=1` on startup; uses per-resolver queries if API available, else falls back to Cloudflare DoH
+
 
 ---
 
@@ -42,7 +45,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## [2.0.0] — 2026-03-11
-
 
 ### 🚀 Major Rework: PHP → Static HTML/JS
 
@@ -79,9 +81,8 @@ single-page application (SPA) that requires no server-side runtime.
 - `dns_servers.txt.bak` — obsolete backup file
 
 ### Technical Notes
-- DNS resolution now uses Cloudflare's DoH endpoint: `https://cloudflare-dns.com/dns-query`
-- Each DNS server in the list is displayed as a result card; status reflects what the
-  public internet resolves (via DoH), not per-resolver direct UDP query (not possible from browser due to CORS)
+- DNS resolution defaults to Cloudflare's DoH endpoint (`https://cloudflare-dns.com/dns-query`) when no PHP backend is available
+- When deployed on PHP hosting, `api/check.php` performs real per-resolver UDP/TCP queries (added in v2.3.0)
 - Requires a static file server (cannot open as `file://` due to fetch CORS restrictions)
 
 ---

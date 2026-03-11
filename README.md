@@ -1,39 +1,54 @@
 # DNS Propagation Checker
 
-A **static, open-source** web tool that checks DNS propagation across **200+ public resolvers worldwide** directly from your browser — no server required.
+A **static + PHP-powered** open-source web tool that checks DNS propagation across **200+ public resolvers worldwide** — with true per-resolver UDP queries when hosted on PHP, and automatic DoH fallback for static hosting.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## Features
 
+- **True Per-Resolver Queries** — when hosted on PHP, sends real UDP/TCP DNS packets to each resolver directly (not routed through DoH)
 - **200+ Public Resolvers** — covers global ISPs, cloud providers, and Indonesian ISPs
-- **10 Record Types** — A, AAAA, MX, TXT, CNAME, PTR, SOA, CAA, DS, DNSKEY
+- **11 Record Types** — A, AAAA, NS, MX, TXT, CNAME, PTR, SOA, CAA, DS, DNSKEY
 - **Query All Types at Once** — select "ALL" to check every record type in a single run
+- **Pagination** — 50 results per page with smart page-number navigation
+- **Filter Tabs** — instantly filter by All / Resolved / No Record with live counts
 - **Color-Coded Results** — green for resolved, red for no record found
 - **Real-time Progress** — progress bar with live resolved/unresolved counters
-- **Fully Static** — runs 100% in the browser using DNS-over-HTTPS (DoH); no PHP, no server
+- **Mobile Responsive** — fully responsive down to small phones
 - **Modern UI** — dark glassmorphism design with smooth animations
+- **DoH Fallback** — works on static hosting (GitHub Pages, Netlify, etc.) via Cloudflare DoH
 
 ## How It Works
 
-DNS queries are made from the browser using **[DNS-over-HTTPS (DoH)](https://developers.cloudflare.com/1.1.1.1/encryption/dns-over-https/)** via Cloudflare's public DoH API (`https://cloudflare-dns.com/dns-query`).
+### With PHP Hosting (recommended)
 
-> **Note on per-resolver checking**: True per-resolver propagation checking from a browser is not possible due to browser CORS restrictions — DNS servers don't expose DoH endpoints. The tool shows what the public internet currently resolves for each domain/record type through a consistent DoH endpoint, mirroring the approach used by tools like [dnschecker.org](https://dnschecker.org).
+The front-end pings `/api/check.php?ping=1` on startup. If the PHP backend is detected, all DNS queries are sent to `api/check.php`, which performs real DNS queries using a transport fallback chain:
+
+```
+UDP port 53  →  TCP port 53  →  DoH via cURL (for resolvers with known endpoints)
+```
+
+This gives true per-resolver results — each card shows what **that specific DNS server** actually returns.
+
+### Without PHP (static hosting)
+
+If the PHP API is not available, the app automatically falls back to querying [Cloudflare DoH](https://developers.cloudflare.com/1.1.1.1/encryption/dns-over-https/) (`https://cloudflare-dns.com/dns-query`) from the browser. All resolver cards will reflect the global internet view via Cloudflare.
 
 ## Supported Record Types
 
-| Type    | Description                   |
-|---------|-------------------------------|
-| A       | IPv4 address                  |
-| AAAA    | IPv6 address                  |
-| MX      | Mail exchange server           |
-| TXT     | Text record (SPF, DMARC, etc) |
-| CNAME   | Canonical name / alias         |
-| PTR     | Reverse DNS (pointer)          |
-| SOA     | Start of Authority             |
-| CAA     | Certification Authority Auth   |
-| DS      | Delegation Signer (DNSSEC)     |
-| DNSKEY  | DNS public key (DNSSEC)        |
+| Type   | Description                    |
+|--------|--------------------------------|
+| A      | IPv4 address                   |
+| AAAA   | IPv6 address                   |
+| NS     | Name server                    |
+| MX     | Mail exchange server           |
+| TXT    | Text record (SPF, DMARC, etc.) |
+| CNAME  | Canonical name / alias         |
+| PTR    | Reverse DNS (pointer)          |
+| SOA    | Start of Authority             |
+| CAA    | Certification Authority Auth   |
+| DS     | Delegation Signer (DNSSEC)     |
+| DNSKEY | DNS public key (DNSSEC)        |
 
 ## DNS Server List
 
@@ -48,39 +63,53 @@ Sources: [publicdnsserver.com](https://publicdnsserver.com)
 
 ```
 rikky-dns/
-├── index.html          # Main SPA page
-├── dns_servers.json    # DNS server list (JSON)
+├── index.html           # Main SPA page
+├── dns_servers.json     # DNS resolver list (JSON)
 ├── css/
-│   └── style.css       # Glassmorphism dark theme
+│   └── style.css        # Glassmorphism dark theme
 ├── js/
-│   └── app.js          # DNS query engine (DoH)
+│   └── app.js           # Query engine (auto-detects PHP or DoH fallback)
+├── api/
+│   ├── check.php        # Per-resolver DNS query backend (UDP → TCP → DoH)
+│   └── diagnostic.php  # Hosting compatibility tester (delete after use)
 ├── README.md
 └── CHANGELOG.md
 ```
 
 ## Deployment
 
-Since the app is fully static, you can host it anywhere:
+### PHP Shared Hosting (full per-resolver mode)
 
-### GitHub Pages
-1. Push the repository to GitHub
-2. Go to **Settings → Pages → Source** → select `main` branch and `/ (root)`
+Upload all files including the `api/` folder. Requires PHP 7.4+ with `fsockopen` enabled (standard on most shared hosts).
+
+To verify your hosting is compatible, upload `api/diagnostic.php` and access:
+```
+https://yourdomain.com/api/diagnostic.php?k=rahasia
+```
+Delete the diagnostic file after testing.
+
+### GitHub Pages / Static Hosting
+
+Upload everything **except** the `api/` folder (PHP won't run). The app will automatically fall back to Cloudflare DoH mode.
+
+1. Push to GitHub
+2. Go to **Settings → Pages → Source** → select `main` branch
 3. Visit `https://yourusername.github.io/rikky-dns`
 
 ### Local Development
-Serve files from a local static server (required for `fetch()` to work with relative paths):
 
 ```bash
-# Using Node.js serve
-npx serve .
+# PHP (full per-resolver mode)
+php -S localhost:8080
 
-# Using Python
+# Python (DoH fallback mode)
 python -m http.server 8080
+
+# Node.js (DoH fallback mode)
+npx serve .
 ```
 
-Then open [http://localhost:8080](http://localhost:8080) in your browser.
-
-> ⚠️ **Do not open `index.html` directly** as a `file://` URL — `fetch()` calls to `dns_servers.json` will be blocked by the browser. Use a local server instead.
+> ⚠️ Do not open `index.html` directly as a `file://` URL — `fetch()` calls will be blocked by the browser.
 
 ## Contributing
 
