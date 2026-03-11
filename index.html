@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DNS Propagation Checker — Rikky DNS</title>
+  <meta name="description" content="Check DNS propagation across 200+ public resolvers worldwide. Supports A, AAAA, MX, TXT, CNAME, PTR, SOA, CAA, DS, and DNSKEY records." />
+  <meta name="author" content="rikky" />
+  <meta property="og:title" content="DNS Propagation Checker" />
+  <meta property="og:description" content="Instantly check DNS propagation from 200+ global public resolvers." />
+  <meta property="og:type" content="website" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- ── Header ── -->
+  <header class="site-header">
+    <div class="header-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 2a14.5 14.5 0 0 0 0 20A14.5 14.5 0 0 0 12 2"/>
+        <path d="M2 12h20"/>
+      </svg>
+      Open Source
+    </div>
+    <h1>DNS Propagation Checker</h1>
+    <p class="subtitle">Verify DNS propagation across 200+ public resolvers worldwide in real time.</p>
+  </header>
+
+  <!-- ── Alert area ── -->
+  <div id="alert-container"></div>
+
+  <!-- ── Query card ── -->
+  <div class="query-card">
+    <div class="query-form">
+
+      <div class="form-group">
+        <label for="domain-input">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" style="display:inline;vertical-align:middle;margin-right:4px">
+            <circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20A14.5 14.5 0 0 0 12 2"/><path d="M2 12h20"/>
+          </svg>
+          Domain / Hostname
+        </label>
+        <input
+          type="text"
+          id="domain-input"
+          placeholder="e.g. google.com or mail.example.com"
+          autocomplete="off"
+          autocapitalize="none"
+          spellcheck="false"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="record-select">Record Type</label>
+        <select id="record-select">
+          <option value="A">A — IPv4 Address</option>
+          <option value="AAAA">AAAA — IPv6 Address</option>
+          <option value="MX">MX — Mail Exchange</option>
+          <option value="TXT">TXT — Text Record</option>
+          <option value="CNAME">CNAME — Canonical Name</option>
+          <option value="PTR">PTR — Pointer</option>
+          <option value="SOA">SOA — Start of Authority</option>
+          <option value="CAA">CAA — Certification Authority</option>
+          <option value="DS">DS — Delegation Signer</option>
+          <option value="DNSKEY">DNSKEY — DNS Key</option>
+          <option value="ALL">ALL — Query All Types</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="flex-direction:row;gap:0.5rem;align-items:flex-end">
+        <button class="btn btn-primary" id="check-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          Check Propagation
+        </button>
+        <button class="btn btn-secondary" id="clear-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
+          </svg>
+          Clear
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Stats bar ── -->
+  <div class="stats-bar" id="stats-bar">
+    <div class="stats-group">
+      <span class="stat-pill resolved-pill">
+        <span class="dot"></span>
+        Resolved: <strong id="stat-resolved">0</strong>
+      </span>
+      <span class="stat-pill unresolved-pill">
+        <span class="dot"></span>
+        No Record: <strong id="stat-unresolved">0</strong>
+      </span>
+      <span class="stat-pill total-pill">
+        <span class="dot"></span>
+        Total: <strong id="stat-total">0</strong>
+      </span>
+    </div>
+
+    <div class="progress-wrap">
+      <span class="domain-label" id="domain-label"></span>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+      <span class="progress-label" id="progress-label">0 / 0</span>
+    </div>
+  </div>
+
+  <!-- ── Results ── -->
+  <section class="results-section" id="results-section" aria-live="polite">
+    <!-- Initial empty state -->
+    <div class="state-placeholder">
+      <div class="icon">🌐</div>
+      <h3>Ready to check</h3>
+      <p>Enter a domain name above and select a record type, then click <strong>Check Propagation</strong> to see results from 200+ public resolvers.</p>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer class="site-footer">
+    <p>
+      Queries are performed via <a href="https://developers.cloudflare.com/1.1.1.1/encryption/dns-over-https/" target="_blank" rel="noopener">DNS-over-HTTPS (DoH)</a> — no server required.
+      DNS server list sourced from <a href="https://publicdnsserver.com" target="_blank" rel="noopener">publicdnsserver.com</a>.
+      &mdash; <a href="https://github.com/masrikky/rikky-dns" target="_blank" rel="noopener">GitHub</a>
+    </p>
+  </footer>
+
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
