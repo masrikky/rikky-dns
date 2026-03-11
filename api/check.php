@@ -2,12 +2,14 @@
 /**
  * DNS Propagation Checker — Per-Resolver Query API
  *
+ * Query chain (per request):
+ *   1. UDP  — raw DNS over UDP port 53 (fastest, may be blocked on some hosts)
+ *   2. TCP  — raw DNS over TCP port 53 (fallback; almost always allowed)
+ *   3. DoH  — RFC 8484 POST via cURL   (fallback for servers with known DoH endpoints)
+ *
  * Endpoint : GET/POST /api/check.php
  * Params   : domain (string), type (string), server (IPv4)
- * Returns  : JSON { status, domain, type, server, records[], rcode, ttl }
- *
- * Uses fsockopen UDP — compatible with shared PHP hosting.
- * No special extensions required.
+ * Returns  : JSON { status, domain, type, server, records[], rcode, ttl, method }
  */
 
 declare(strict_types=1);
@@ -45,10 +47,54 @@ const TYPE_CODES = [
     'CAA'    => 257,
 ];
 
+/**
+ * Known public DoH endpoints (RFC 8484) indexed by resolver IP.
+ * Used as last-resort fallback when both UDP and TCP are unavailable.
+ */
+const DOH_ENDPOINTS = [
+    // Cloudflare
+    '1.1.1.1'           => 'https://1.1.1.1/dns-query',
+    '1.0.0.1'           => 'https://1.0.0.1/dns-query',
+    '1.0.0.2'           => 'https://cloudflare-dns.com/dns-query',
+    // Google
+    '8.8.8.8'           => 'https://8.8.8.8/dns-query',
+    '8.8.4.4'           => 'https://8.8.4.4/dns-query',
+    // Quad9
+    '9.9.9.9'           => 'https://9.9.9.9/dns-query',
+    '9.9.9.10'          => 'https://9.9.9.10/dns-query',
+    '149.112.112.10'    => 'https://149.112.112.10/dns-query',
+    '149.112.112.112'   => 'https://149.112.112.112/dns-query',
+    // AdGuard
+    '94.140.14.14'      => 'https://94.140.14.14/dns-query',
+    '94.140.15.15'      => 'https://94.140.15.15/dns-query',
+    '94.140.14.15'      => 'https://94.140.14.15/dns-query',
+    '94.140.15.16'      => 'https://94.140.15.16/dns-query',
+    '94.140.14.140'     => 'https://94.140.14.140/dns-query',
+    '94.140.14.141'     => 'https://94.140.14.141/dns-query',
+    // OpenDNS (Cisco)
+    '208.67.222.222'    => 'https://doh.opendns.com/dns-query',
+    '208.67.220.220'    => 'https://doh.opendns.com/dns-query',
+    // Alibaba
+    '223.5.5.5'         => 'https://dns.alidns.com/dns-query',
+    '223.6.6.6'         => 'https://dns.alidns.com/dns-query',
+    // NextDNS
+    '45.90.29.120'      => 'https://dns.nextdns.io/dns-query',
+    '45.90.30.97'       => 'https://dns.nextdns.io/dns-query',
+    '45.90.29.149'      => 'https://dns.nextdns.io/dns-query',
+    '45.90.31.217'      => 'https://dns.nextdns.io/dns-query',
+    '45.90.28.169'      => 'https://dns.nextdns.io/dns-query',
+    // Hurricane Electric
+    '74.82.42.42'       => 'https://74.82.42.42/dns-query',
+    // Wikimedia
+    '185.71.138.138'    => 'https://185.71.138.138/dns-query',
+    // Yandex
+    '77.88.8.8'         => 'https://77.88.8.8/dns-query',
+];
+
 // ── Ping / health-check ─────────────────────────────────────────────────────
 
 if (isset($_GET['ping'])) {
-    echo json_encode(['status' => 'ok', 'version' => '1.0']);
+    echo json_encode(['status' => 'ok', 'version' => '2.0', 'curl' => function_exists('curl_init')]);
     exit;
 }
 
@@ -79,49 +125,142 @@ if (!array_key_exists($type, TYPE_CODES)) {
 $result = dns_query($domain, $type, $server);
 echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
-// ── Functions ───────────────────────────────────────────────────────────────
+// ── Main query orchestrator ────────────────────────────────────────────────
 
 /**
- * Perform a real UDP DNS query against the given resolver.
+ * Attempt DNS query using UDP → TCP → DoH (cURL) cascade.
  */
 function dns_query(string $domain, string $type, string $server): array {
     $type_code = TYPE_CODES[$type];
     $query_id  = random_int(1, 65535);
     $packet    = build_query($domain, $type_code, $query_id);
 
-    // Open UDP socket using fsockopen (supported on most shared hosting)
+    // 1 — UDP
+    $raw = query_udp($server, $packet);
+    if ($raw !== null) {
+        return parse_response($raw, $domain, $type, $type_code, $server, $query_id, 'udp');
+    }
+
+    // 2 — TCP fallback
+    $raw = query_tcp($server, $packet);
+    if ($raw !== null) {
+        return parse_response($raw, $domain, $type, $type_code, $server, $query_id, 'tcp');
+    }
+
+    // 3 — DoH via cURL fallback (only if server has a known DoH endpoint)
+    $raw = query_doh_curl($server, $packet);
+    if ($raw !== null) {
+        return parse_response($raw, $domain, $type, $type_code, $server, $query_id, 'doh');
+    }
+
+    return timeout_response($domain, $type, $server);
+}
+
+// ── Transport layer implementations ───────────────────────────────────────
+
+/**
+ * UDP DNS query (standard, fastest, may be blocked on some hosts).
+ */
+function query_udp(string $server, string $packet): ?string {
     $errno  = 0;
     $errstr = '';
     $sock   = @fsockopen("udp://{$server}", DNS_PORT, $errno, $errstr, TIMEOUT_SEC);
-
-    if (!$sock) {
-        return error_response($domain, $type, $server, "Socket error: {$errstr} ({$errno})");
-    }
+    if (!$sock) return null;
 
     stream_set_timeout($sock, TIMEOUT_SEC);
 
-    $written = fwrite($sock, $packet);
-    if ($written === false) {
+    if (fwrite($sock, $packet) === false) {
         fclose($sock);
-        return error_response($domain, $type, $server, 'Failed to send DNS packet');
+        return null;
     }
 
     $response = fread($sock, MAX_PKT_SIZE);
     fclose($sock);
 
-    $info = stream_get_meta_data($sock ?? null);
-    if ($response === false || strlen($response) < 12) {
-        return timeout_response($domain, $type, $server);
-    }
-
-    return parse_response($response, $domain, $type, $type_code, $server, $query_id);
+    return (is_string($response) && strlen($response) >= 12) ? $response : null;
 }
 
 /**
- * Build a minimal DNS query packet.
+ * TCP DNS query (RFC 1035 §4.2.2 — 2-byte message length prefix).
+ * More likely to work on shared hosting than UDP.
+ */
+function query_tcp(string $server, string $packet): ?string {
+    $errno  = 0;
+    $errstr = '';
+    // Plain TCP — no "tcp://" prefix needed for fsockopen
+    $sock = @fsockopen($server, DNS_PORT, $errno, $errstr, TIMEOUT_SEC);
+    if (!$sock) return null;
+
+    stream_set_timeout($sock, TIMEOUT_SEC);
+
+    // Prefix packet with 2-byte big-endian length
+    $written = fwrite($sock, pack('n', strlen($packet)) . $packet);
+    if ($written === false) {
+        fclose($sock);
+        return null;
+    }
+
+    // Read 2-byte response length
+    $len_bytes = '';
+    while (strlen($len_bytes) < 2) {
+        $chunk = fread($sock, 2 - strlen($len_bytes));
+        if ($chunk === false || $chunk === '') { fclose($sock); return null; }
+        $len_bytes .= $chunk;
+    }
+    $resp_len = unpack('n', $len_bytes)[1];
+
+    // Read full response
+    $response = '';
+    while (strlen($response) < $resp_len) {
+        $chunk = fread($sock, $resp_len - strlen($response));
+        if ($chunk === false || $chunk === '') break;
+        $response .= $chunk;
+    }
+    fclose($sock);
+
+    return strlen($response) >= 12 ? $response : null;
+}
+
+/**
+ * DoH fallback via cURL using RFC 8484 binary DNS-over-HTTPS.
+ * Only used if the server has a known DoH endpoint AND cURL is available.
+ */
+function query_doh_curl(string $server, string $packet): ?string {
+    $doh_url = DOH_ENDPOINTS[$server] ?? null;
+    if ($doh_url === null || !function_exists('curl_init')) return null;
+
+    $ch = curl_init($doh_url);
+    curl_setopt_array($ch, [
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => $packet,
+        CURLOPT_HTTPHEADER     => [
+            'Content-Type: application/dns-message',
+            'Accept: application/dns-message',
+        ],
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => TIMEOUT_SEC,
+        CURLOPT_CONNECTTIMEOUT => TIMEOUT_SEC,
+        CURLOPT_SSL_VERIFYPEER => true,
+        CURLOPT_FOLLOWLOCATION => false,
+    ]);
+
+    $response  = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($response === false || $http_code !== 200 || strlen($response) < 12) {
+        return null;
+    }
+    return $response;
+}
+
+// ── DNS packet builder ─────────────────────────────────────────────────────
+
+/**
+ * Build a minimal DNS query packet (RFC 1035).
  */
 function build_query(string $domain, int $type_code, int $id): string {
-    // Header: ID | Flags (RD=1) | QDCOUNT=1 | ANCOUNT=0 | NSCOUNT=0 | ARCOUNT=0
+    // Header: ID | QR=0 RD=1 | QDCOUNT=1 | others=0
     $header = pack('nnnnnn', $id, 0x0100, 1, 0, 0, 0);
 
     // QNAME: length-prefixed labels, terminated with 0x00
@@ -132,41 +271,26 @@ function build_query(string $domain, int $type_code, int $id): string {
     }
     $qname .= "\x00";
 
-    // QTYPE + QCLASS (IN = 1)
-    $question = $qname . pack('nn', $type_code, 1);
-
-    return $header . $question;
+    return $header . $qname . pack('nn', $type_code, 1); // QTYPE + QCLASS IN
 }
 
-/**
- * Parse a raw DNS response packet.
- */
+// ── DNS response parser ────────────────────────────────────────────────────
+
 function parse_response(
     string $data, string $domain, string $type, int $type_code,
-    string $server, int $expected_id
+    string $server, int $expected_id, string $method
 ): array {
-    if (strlen($data) < 12) {
-        return timeout_response($domain, $type, $server);
-    }
+    if (strlen($data) < 12) return timeout_response($domain, $type, $server);
 
     $header = unpack('nid/nflags/nqd/nan/nns/nar', substr($data, 0, 12));
     $rcode  = $header['flags'] & 0x000F;
 
-    // Verify response ID matches query ID
     if ($header['id'] !== $expected_id) {
         return error_response($domain, $type, $server, 'Response ID mismatch');
     }
 
-    // RCODE != 0 means NXDOMAIN (3), SERVFAIL (2), etc.
     if ($rcode !== 0) {
-        return [
-            'status'  => 'ok',
-            'domain'  => $domain,
-            'type'    => $type,
-            'server'  => $server,
-            'records' => [],
-            'rcode'   => $rcode,
-        ];
+        return make_result($domain, $type, $server, [], $rcode, 0, $method);
     }
 
     $offset = 12;
@@ -177,7 +301,7 @@ function parse_response(
         $offset += 4; // QTYPE + QCLASS
     }
 
-    // Parse answer section
+    // Parse answer records
     $records = [];
     $ttl     = 0;
 
@@ -185,7 +309,6 @@ function parse_response(
         if ($offset + 10 > strlen($data)) break;
 
         [, $offset] = read_name($data, $offset);
-
         $rr = unpack('ntype/nclass/Nttl/nrdlen', substr($data, $offset, 10));
         $offset += 10;
 
@@ -202,29 +325,18 @@ function parse_response(
         $offset += $rr['rdlen'];
     }
 
-    return [
-        'status'  => 'ok',
-        'domain'  => $domain,
-        'type'    => $type,
-        'server'  => $server,
-        'records' => $records,
-        'rcode'   => 0,
-        'ttl'     => $ttl,
-    ];
+    return make_result($domain, $type, $server, $records, 0, $ttl, $method);
 }
 
-/**
- * Parse RDATA for a given record type.
- */
+// ── RDATA parsers ──────────────────────────────────────────────────────────
+
 function parse_rdata(string $data, int $offset, int $length, int $type): ?string {
     switch ($type) {
-        case 1: // A
-            if ($length !== 4) return null;
-            return inet_ntop(substr($data, $offset, 4)) ?: null;
+        case 1:  // A
+            return ($length === 4) ? (inet_ntop(substr($data, $offset, 4)) ?: null) : null;
 
         case 28: // AAAA
-            if ($length !== 16) return null;
-            return inet_ntop(substr($data, $offset, 16)) ?: null;
+            return ($length === 16) ? (inet_ntop(substr($data, $offset, 16)) ?: null) : null;
 
         case 2:  // NS
         case 5:  // CNAME
@@ -251,10 +363,10 @@ function parse_rdata(string $data, int $offset, int $length, int $type): ?string
 
         case 6: // SOA
             [$mname, $next] = read_name($data, $offset);
-            [$rname]        = read_name($data, $next);
-            if ($next + 20 > strlen($data)) return "{$mname} {$rname}";
-            $fields = unpack('Nserial/Nrefresh/Nretry/Nexpire/Nminttl', substr($data, $next, 20));
-            return "{$mname} {$rname} {$fields['serial']} {$fields['refresh']} {$fields['retry']} {$fields['expire']} {$fields['minttl']}";
+            [$rname, $after_rname] = read_name($data, $next);
+            if ($after_rname + 20 > strlen($data)) return "{$mname} {$rname}";
+            $f = unpack('Nserial/Nrefresh/Nretry/Nexpire/Nmin', substr($data, $after_rname, 20));
+            return "{$mname} {$rname} {$f['serial']} {$f['refresh']} {$f['retry']} {$f['expire']} {$f['min']}";
 
         case 257: // CAA
             if ($length < 2) return null;
@@ -285,29 +397,25 @@ function parse_rdata(string $data, int $offset, int $length, int $type): ?string
     }
 }
 
+// ── Name helpers ───────────────────────────────────────────────────────────
+
 /**
- * Read a (possibly compressed) DNS name starting at $offset.
+ * Read a (possibly pointer-compressed) DNS name.
  * Returns [name_string, offset_after_name].
  */
 function read_name(string $data, int $offset): array {
-    $labels      = [];
-    $end_offset  = -1;
-    $jumps       = 0;
-    $max_jumps   = 20;
+    $labels     = [];
+    $end_offset = -1;
+    $jumps      = 0;
 
-    while ($offset < strlen($data) && $jumps < $max_jumps) {
+    while ($offset < strlen($data) && $jumps < 20) {
         $len = ord($data[$offset]);
 
-        if ($len === 0) {
-            $offset++;
-            break;
-        }
+        if ($len === 0) { $offset++; break; }
 
-        // Pointer (DNS compression)
-        if (($len & 0xC0) === 0xC0) {
+        if (($len & 0xC0) === 0xC0) {         // pointer
             if ($end_offset === -1) $end_offset = $offset + 2;
-            $ptr    = (($len & 0x3F) << 8) | ord($data[$offset + 1]);
-            $offset = $ptr;
+            $offset = (($len & 0x3F) << 8) | ord($data[$offset + 1]);
             $jumps++;
             continue;
         }
@@ -321,31 +429,46 @@ function read_name(string $data, int $offset): array {
     return [implode('.', $labels), $end_offset];
 }
 
-/**
- * Advance $offset past a DNS name (used for skipping question section).
- */
 function skip_name(string $data, int $offset): int {
     while ($offset < strlen($data)) {
         $len = ord($data[$offset]);
         if ($len === 0)              return $offset + 1;
-        if (($len & 0xC0) === 0xC0) return $offset + 2; // pointer
+        if (($len & 0xC0) === 0xC0) return $offset + 2;
         $offset += $len + 1;
     }
     return $offset;
 }
 
-// ── Helpers ─────────────────────────────────────────────────────────────────
+// ── Response builders ──────────────────────────────────────────────────────
+
+function make_result(
+    string $domain, string $type, string $server,
+    array $records, int $rcode, int $ttl, string $method
+): array {
+    return [
+        'status'  => 'ok',
+        'domain'  => $domain,
+        'type'    => $type,
+        'server'  => $server,
+        'records' => $records,
+        'rcode'   => $rcode,
+        'ttl'     => $ttl,
+        'method'  => $method,   // 'udp' | 'tcp' | 'doh'
+    ];
+}
+
+function error_response(string $domain, string $type, string $server, string $msg): array {
+    return ['status' => 'error', 'domain' => $domain, 'type' => $type,
+            'server' => $server, 'records' => [], 'rcode' => -1, 'error' => $msg];
+}
+
+function timeout_response(string $domain, string $type, string $server): array {
+    return ['status' => 'ok', 'domain' => $domain, 'type' => $type,
+            'server' => $server, 'records' => [], 'rcode' => -1, 'error' => 'no transport available'];
+}
 
 function json_error(int $code, string $msg): void {
     http_response_code($code);
     echo json_encode(['status' => 'error', 'message' => $msg]);
     exit;
-}
-
-function error_response(string $domain, string $type, string $server, string $msg): array {
-    return ['status' => 'error', 'domain' => $domain, 'type' => $type, 'server' => $server, 'records' => [], 'rcode' => -1, 'error' => $msg];
-}
-
-function timeout_response(string $domain, string $type, string $server): array {
-    return ['status' => 'ok', 'domain' => $domain, 'type' => $type, 'server' => $server, 'records' => [], 'rcode' => -1, 'error' => 'timeout'];
 }
