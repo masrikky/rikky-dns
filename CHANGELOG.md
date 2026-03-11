@@ -7,7 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.6.0] — 2026-03-12
+
+### Added
+- **Docker support** — production-ready containerisation:
+  - `Dockerfile` — `php:8.3-apache` base; installs `curl` extension, enables Apache rewrite, removes diagnostic script from image, adds healthcheck
+  - `docker-compose.yml` — convenience wrapper with source volume mounts for live-reload in dev and public DNS (`8.8.8.8`, `1.1.1.1`) so the container can reach resolvers on port 53
+  - `.dockerignore` — excludes `.git`, Docker files, IDE dirs, OS artifacts
+
+---
+
 ## [2.5.0] — 2026-03-12
+
 
 ### Changed
 - **Smarter timeout cascade in `api/check.php`** — dead servers now fail in ~2 s instead of up to 15 s:

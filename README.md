@@ -75,11 +75,30 @@ rikky-dns/
 ├── api/
 │   ├── check.php        # Per-resolver DNS query backend (UDP → TCP → DoH)
 │   └── diagnostic.php  # Hosting compatibility tester (delete after use)
+├── Dockerfile           # php:8.3-apache production image
+├── docker-compose.yml   # Dev / self-hosted convenience wrapper
+├── .dockerignore
 ├── README.md
 └── CHANGELOG.md
 ```
 
 ## Deployment
+
+### Docker (self-hosted)
+
+```bash
+# Production — build and run
+docker build -t rikky-dns .
+docker run -p 8080:80 rikky-dns
+# Open http://localhost:8080
+
+# Development — live reload via volume mounts
+docker compose up --build
+```
+
+> ⚠️ The container needs outbound access to public resolvers on **UDP/TCP port 53**.
+> `docker-compose.yml` sets the container DNS to `8.8.8.8` / `1.1.1.1` to ensure this works.
+> `api/diagnostic.php` is automatically removed from the production image.
 
 ### PHP Shared Hosting (full per-resolver mode)
 
