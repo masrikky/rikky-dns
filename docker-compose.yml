@@ -1,0 +1,21 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rikky-dns
+    ports:
+      - "8080:80"
+    # Mount source for live-reload during development.
+    # Comment out the volumes block for a clean production build.
+    volumes:
+      - ./index.html:/var/www/html/index.html:ro
+      - ./css:/var/www/html/css:ro
+      - ./js:/var/www/html/js:ro
+      - ./dns_servers.json:/var/www/html/dns_servers.json:ro
+      - ./api/check.php:/var/www/html/api/check.php:ro
+    restart: unless-stopped
+    # DNS: ensure container can reach public resolvers
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1

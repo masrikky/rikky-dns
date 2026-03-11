@@ -1,0 +1,22 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Docker files (no need to copy into image)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Dev / OS artifacts
+.DS_Store
+Thumbs.db
+*.log
+
+# Antigravity / IDE
+.gemini
+.vscode
+.idea
+
+# Diagnostic script (excluded via Dockerfile RUN rm, but belt-and-suspenders)
+api/diagnostic.php
