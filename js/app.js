@@ -18,6 +18,7 @@ const DOH_ENDPOINT = 'https://cloudflare-dns.com/dns-query';
 const RECORD_TYPES = {
   A:       { label: 'A',       desc: 'IPv4 address' },
   AAAA:    { label: 'AAAA',    desc: 'IPv6 address' },
+  NS:      { label: 'NS',      desc: 'Name server' },
   MX:      { label: 'MX',      desc: 'Mail exchange' },
   TXT:     { label: 'TXT',     desc: 'Text record' },
   CNAME:   { label: 'CNAME',   desc: 'Canonical name' },
