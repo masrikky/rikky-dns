@@ -36,8 +36,9 @@ const TYPE_CODES = {
   TXT: 16, AAAA: 28, DS: 43, DNSKEY: 48, CAA: 257,
 };
 
-const CONCURRENT_QUERIES = 8;    // parallel DoH requests per batch
-const QUERY_TIMEOUT_MS   = 8000; // per-request timeout
+const CONCURRENT_QUERIES = 10;   // parallel requests per batch
+const QUERY_TIMEOUT_MS   = 8000; // timeout for DoH mode
+const PROXY_TIMEOUT_MS   = 4000; // timeout for PHP proxy mode (UDP 2s + DoH 3s headroom)
 const PAGE_SIZE          = 50;   // cards per page
 
 // ── State ──────────────────────────────────────────────────────────────────
@@ -265,10 +266,11 @@ async function startCheck() {
       await Promise.all(batch.map(async ({ server, type, key }) => {
         let values = [];
         try {
+          const timeoutMs = useProxy ? PROXY_TIMEOUT_MS : QUERY_TIMEOUT_MS;
           values = await Promise.race([
             query(domain, type, server.ip, abortController.signal),
             new Promise((_, rej) =>
-              setTimeout(() => rej(new Error('timeout')), QUERY_TIMEOUT_MS)
+              setTimeout(() => rej(new Error('timeout')), timeoutMs)
             ),
           ]);
         } catch (_) { values = []; }

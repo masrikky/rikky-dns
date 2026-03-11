@@ -29,9 +29,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 // ── Config ──────────────────────────────────────────────────────────────────
 
-const DNS_PORT     = 53;
-const TIMEOUT_SEC  = 5;
-const MAX_PKT_SIZE = 4096;
+const DNS_PORT          = 53;
+const UDP_TIMEOUT_SEC   = 2;   // read timeout for UDP — dead servers fail-fast
+const TCP_TIMEOUT_SEC   = 3;   // TCP connect + read timeout
+const CURL_TIMEOUT_SEC  = 3;   // cURL connect + request timeout
+const MAX_PKT_SIZE      = 4096;
 
 const TYPE_CODES = [
     'A'      => 1,
@@ -128,7 +130,10 @@ echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 // ── Main query orchestrator ────────────────────────────────────────────────
 
 /**
- * Attempt DNS query using UDP → TCP → DoH (cURL) cascade.
+ * Attempt DNS query using smart cascade:
+ *   1. UDP  — fast, 2 s timeout
+ *   2. TCP  — only if UDP socket itself failed (host blocks UDP)
+ *   3. DoH  — last resort for resolvers with known public endpoints
  */
 function dns_query(string $domain, string $type, string $server): array {
     $type_code = TYPE_CODES[$type];
@@ -136,18 +141,22 @@ function dns_query(string $domain, string $type, string $server): array {
     $packet    = build_query($domain, $type_code, $query_id);
 
     // 1 — UDP
-    $raw = query_udp($server, $packet);
+    [$raw, $udp_socket_ok] = query_udp($server, $packet);
     if ($raw !== null) {
         return parse_response($raw, $domain, $type, $type_code, $server, $query_id, 'udp');
     }
 
-    // 2 — TCP fallback
-    $raw = query_tcp($server, $packet);
-    if ($raw !== null) {
-        return parse_response($raw, $domain, $type, $type_code, $server, $query_id, 'tcp');
+    // 2 — TCP: only worth trying when UDP socket couldn’t be created
+    //          (= PHP host has UDP blocked). If socket opened but got no
+    //          response, the server itself is dead — TCP will also time out.
+    if (!$udp_socket_ok) {
+        $raw = query_tcp($server, $packet);
+        if ($raw !== null) {
+            return parse_response($raw, $domain, $type, $type_code, $server, $query_id, 'tcp');
+        }
     }
 
-    // 3 — DoH via cURL fallback (only if server has a known DoH endpoint)
+    // 3 — DoH via cURL (only for resolvers with known endpoints)
     $raw = query_doh_curl($server, $packet);
     if ($raw !== null) {
         return parse_response($raw, $domain, $type, $type_code, $server, $query_id, 'doh');
@@ -159,41 +168,45 @@ function dns_query(string $domain, string $type, string $server): array {
 // ── Transport layer implementations ───────────────────────────────────────
 
 /**
- * UDP DNS query (standard, fastest, may be blocked on some hosts).
+ * UDP DNS query.
+ * Returns [raw_response|null, socket_was_created].
+ * socket_was_created = false means the host blocks outbound UDP port 53.
  */
-function query_udp(string $server, string $packet): ?string {
+function query_udp(string $server, string $packet): array {
     $errno  = 0;
     $errstr = '';
-    $sock   = @fsockopen("udp://{$server}", DNS_PORT, $errno, $errstr, TIMEOUT_SEC);
-    if (!$sock) return null;
+    $sock   = @fsockopen("udp://{$server}", DNS_PORT, $errno, $errstr, 1);
+    if (!$sock) return [null, false];   // host blocks UDP
 
-    stream_set_timeout($sock, TIMEOUT_SEC);
+    stream_set_timeout($sock, UDP_TIMEOUT_SEC);
 
     if (fwrite($sock, $packet) === false) {
         fclose($sock);
-        return null;
+        return [null, true];            // socket ok, write failed
     }
 
     $response = fread($sock, MAX_PKT_SIZE);
     fclose($sock);
 
-    return (is_string($response) && strlen($response) >= 12) ? $response : null;
+    // Check if it actually timed out (no response) vs got data
+    if (is_string($response) && strlen($response) >= 12) {
+        return [$response, true];       // got a valid response
+    }
+    return [null, true];                // socket ok but server didn’t reply
 }
 
 /**
  * TCP DNS query (RFC 1035 §4.2.2 — 2-byte message length prefix).
- * More likely to work on shared hosting than UDP.
+ * Used when host blocks UDP. Short connect timeout to fail-fast.
  */
 function query_tcp(string $server, string $packet): ?string {
     $errno  = 0;
     $errstr = '';
-    // Plain TCP — no "tcp://" prefix needed for fsockopen
-    $sock = @fsockopen($server, DNS_PORT, $errno, $errstr, TIMEOUT_SEC);
+    $sock = @fsockopen($server, DNS_PORT, $errno, $errstr, TCP_TIMEOUT_SEC);
     if (!$sock) return null;
 
-    stream_set_timeout($sock, TIMEOUT_SEC);
+    stream_set_timeout($sock, TCP_TIMEOUT_SEC);
 
-    // Prefix packet with 2-byte big-endian length
     $written = fwrite($sock, pack('n', strlen($packet)) . $packet);
     if ($written === false) {
         fclose($sock);
@@ -238,8 +251,8 @@ function query_doh_curl(string $server, string $packet): ?string {
             'Accept: application/dns-message',
         ],
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => TIMEOUT_SEC,
-        CURLOPT_CONNECTTIMEOUT => TIMEOUT_SEC,
+        CURLOPT_TIMEOUT        => CURL_TIMEOUT_SEC,
+        CURLOPT_CONNECTTIMEOUT => CURL_TIMEOUT_SEC,
         CURLOPT_SSL_VERIFYPEER => true,
         CURLOPT_FOLLOWLOCATION => false,
     ]);
